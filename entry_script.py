@@ -29,12 +29,14 @@ def write_output_file():
 # returns 2D array containing an array of lists of tokenized words
 def tokenize(filepath):
     tokens = []
+    tokenIndexes = []
     with open(filepath, "r") as inputfile:
         csv_reader = csv.reader(inputfile, delimiter=',')
         for row in csv_reader:
+            tokenIndexes.append(row[0])
             tokenized_row = row[1].split()
             tokens.append(tokenized_row)
-    return tokens
+    return tokens, tokenIndexes
 
 
 # input: list of tokens
@@ -52,17 +54,17 @@ def stop_words_removal(tokens):
 # outputs preprocessed 2D array
 def preprocess(path):
     preprocessed = []
-
+    tokenized_input, index_list = tokenize(path)
     ps = PorterStemmer()
 
-    for list in tokenize(path):
+    for list in tokenized_input:
         low_tokens_without_stopwords = stop_words_removal(list)
         temp = []
         for word in low_tokens_without_stopwords:
             temp.append(ps.stem(word))
         preprocessed.append(temp)
 
-    return preprocessed[1:]  # slice the first element which is the type
+    return preprocessed[1:], index_list[1:]  # slice the first element which is the type
 
 
 # Input: 2 2D arrays of preprocessed data.
@@ -99,7 +101,12 @@ def vectorRepresentation(tokenlist, master_vocabulary, n, d):
             vector.append(0)
         else:
             tf = tokenlist.count(word)
-            print(tf)
+            #print(tf)
+
+
+# Returns the number of requirements containing the ith word of the master vocabulary
+def d():
+    return
 
 
 if __name__ == "__main__":
@@ -124,10 +131,12 @@ if __name__ == "__main__":
     with open("dataset-1/low.csv", "r") as inputfile:
         print(f"There are {len(inputfile.readlines()) - 1} low-level requirements")
 
-    high_preprocessed = preprocess("dataset-1/high.csv")
-    low_preprocessed = preprocess("dataset-1/low.csv")
+    high_preprocessed, high_index_list = preprocess("dataset-1/high.csv")
+    low_preprocessed, low_index_list = preprocess("dataset-1/low.csv")
+    print(low_index_list)
 
-    vectorRepresentation(low_preprocessed[0], master_vocabulary(high_preprocessed, low_preprocessed))
+    vectorRepresentation(low_preprocessed[0], master_vocabulary(high_preprocessed, low_preprocessed), 2,3)
+
     '''
     This is where you should implement the trace level logic as discussed in the 
     assignment on Canvas. Please ensure that you take care to deliver clean,
