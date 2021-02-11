@@ -1,6 +1,10 @@
 import csv
 import sys
 from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+
+
+
 
 
 def write_output_file():
@@ -124,4 +128,9 @@ if __name__ == "__main__":
     low_preprocessed = preprocess("dataset-1/low.csv")
 
     vectorRepresentation(low_preprocessed[0], master_vocabulary(high_preprocessed, low_preprocessed))
+    '''
+    This is where you should implement the trace level logic as discussed in the 
+    assignment on Canvas. Please ensure that you take care to deliver clean,
+    modular, and well-commented code.
+    '''
     write_output_file()
