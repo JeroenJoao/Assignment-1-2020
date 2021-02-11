@@ -131,15 +131,34 @@ if __name__ == "__main__":
     with open("dataset-1/low.csv", "r") as inputfile:
         print(f"There are {len(inputfile.readlines()) - 1} low-level requirements")
 
+    '''
+    This is where you should implement the trace level logic as discussed in the 
+    assignment on Canvas. Please ensure that you take care to deliver clean,
+    modular, and well-commented code.
+    '''
+
     high_preprocessed, high_index_list = preprocess("dataset-1/high.csv")
     low_preprocessed, low_index_list = preprocess("dataset-1/low.csv")
     print(low_index_list)
 
     vectorRepresentation(low_preprocessed[0], master_vocabulary(high_preprocessed, low_preprocessed), 2,3)
 
-    '''
-    This is where you should implement the trace level logic as discussed in the 
-    assignment on Canvas. Please ensure that you take care to deliver clean,
-    modular, and well-commented code.
-    '''
+    # create similarity matrix
+    similarityMatrix(1,2)
+
+    # branch on program input (0, 1, 2 or 3)
+    if match_type == 0: 
+        # Similarity of at least 0
+        print(0)
+    if match_type == 1:
+        # Similarity of at least .25
+        print(1)    
+    if match_type == 2:
+        # Similarity of at least .67 of the most similar low level requirement.
+        print(2)
+    if match_type == 3:
+        # custom technique
+        print(3)
+    
+    # output current links to file (add parameter a list of created links)
     write_output_file()
