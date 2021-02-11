@@ -2,7 +2,7 @@ import csv
 import sys
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
-
+import numpy as np
 
 
 
@@ -69,8 +69,11 @@ def preprocess(path):
 
 # Input: 2 2D arrays of preprocessed data.
 # Output: Similarity matrix
-def similarityMatrix(highlevel, lowlevel):
-    return
+def similarityMatrix(H, L):
+    num=np.dot(H,L.T)
+    p1=np.sqrt(np.sum(H**2,axis=1))[:,np.newaxis]
+    p2=np.sqrt(np.sum(L**2,axis=1))[np.newaxis,:]
+    return num/(p1*p2)
 
 
 
@@ -144,7 +147,7 @@ if __name__ == "__main__":
     vectorRepresentation(low_preprocessed[0], master_vocabulary(high_preprocessed, low_preprocessed), 2,3)
 
     # create similarity matrix
-    similarityMatrix(1,2)
+    # similarityMatrix(H, L) where H is vector representation of high, L of low
 
     # branch on program input (0, 1, 2 or 3)
     if match_type == 0: 
