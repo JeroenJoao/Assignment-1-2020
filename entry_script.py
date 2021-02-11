@@ -1,6 +1,10 @@
 import csv
 import sys
 from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+
+
+
 
 
 def write_output_file():
@@ -85,4 +89,10 @@ if __name__ == "__main__":
 
     print(preprocess("dataset-1/low.csv"))
 
+    '''
+    This is where you should implement the trace level logic as discussed in the 
+    assignment on Canvas. Please ensure that you take care to deliver clean,
+    modular, and well-commented code.
+    '''
+    print(stopwords.words('english'))
     write_output_file()
