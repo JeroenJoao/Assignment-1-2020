@@ -61,6 +61,43 @@ def preprocess(path):
     return preprocessed[1:]  # slice the first element which is the type
 
 
+# Input: 2 2D arrays of preprocessed data.
+# Output: Similarity matrix
+def similarityMatrix(highlevel, lowlevel):
+    return
+
+
+
+# Input: preprocessed high and lowlevel requirements
+# Output: List of all tokens used
+def master_vocabulary(highlevel, lowlevel):
+    master_vocabulary_list = []
+
+    for list in highlevel:
+        for word in list:
+            if word not in master_vocabulary_list:
+                master_vocabulary_list.append(word)
+
+    for list in lowlevel:
+        for word in list:
+            if word not in master_vocabulary_list:
+                master_vocabulary_list.append(word)
+
+    return master_vocabulary_list
+
+
+# Input: list of tokens and list master vocabulary
+# output: Vector representation of token list
+def vectorRepresentation(tokenlist, master_vocabulary, n, d):
+    vector = []
+    for word in master_vocabulary:
+        if word not in tokenlist:
+            vector.append(0)
+        else:
+            tf = tokenlist.count(word)
+            print(tf)
+
+
 if __name__ == "__main__":
     '''
     Entry point for the script
@@ -83,6 +120,8 @@ if __name__ == "__main__":
     with open("dataset-1/low.csv", "r") as inputfile:
         print(f"There are {len(inputfile.readlines()) - 1} low-level requirements")
 
-    print(preprocess("dataset-1/low.csv"))
+    high_preprocessed = preprocess("dataset-1/high.csv")
+    low_preprocessed = preprocess("dataset-1/low.csv")
 
+    vectorRepresentation(low_preprocessed[0], master_vocabulary(high_preprocessed, low_preprocessed))
     write_output_file()
