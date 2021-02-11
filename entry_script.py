@@ -1,8 +1,7 @@
 import csv
 import sys
+import math
 from nltk.stem import PorterStemmer
-from nltk.corpus import stopwords
-
 
 
 
@@ -92,21 +91,57 @@ def master_vocabulary(highlevel, lowlevel):
     return master_vocabulary_list
 
 
-# Input: list of tokens and list master vocabulary
+# Input: list of tokens and list master vocabulary, n and d_list
 # output: Vector representation of token list
-def vectorRepresentation(tokenlist, master_vocabulary, n, d):
+def vectorRepresentation(tokenlist, master_vocabulary, n, d_list):
     vector = []
-    for word in master_vocabulary:
-        if word not in tokenlist:
+
+    for i in range(0, len(master_vocabulary)):
+        if master_vocabulary[i] not in tokenlist:
             vector.append(0)
         else:
-            tf = tokenlist.count(word)
-            #print(tf)
+            tf = tokenlist.count(master_vocabulary[i])
+            idf = math.log2(n/d_list[i])
+            vector.append(tf * idf)
+
+    return vector
 
 
+# Input: highlevel and lowlevel requirements list and the master vocabulary(list) with an index
 # Returns the number of requirements containing the ith word of the master vocabulary
-def d():
-    return
+def d(highlevel, lowlevel, master_vocabulary, i):
+    word_from_vocabulary = master_vocabulary[i]
+    requirements_counter = 0
+
+    for list in highlevel:
+        for word in list:
+            if word == word_from_vocabulary:
+                requirements_counter += 1
+
+    for list in lowlevel:
+        for word in list:
+            if word == word_from_vocabulary:
+                requirements_counter += 1
+
+    return requirements_counter
+
+
+# Input: highlevel, lowlevel, master_vocabulary
+# Output: array where index i had the number of requirements containing the ith word of the master vocabulary
+def create_d_array(highlevel, lowlevel, master_vocabulary):
+    d_list = []
+
+    for i in range(0, len(master_vocabulary)):
+        d_list.append(d(highlevel, lowlevel, master_vocabulary, i))
+
+    return d_list
+
+
+# input: highlevel and lowlevel requirements
+# returns the total number of requirements
+def total_requirements(highlevel, lowlevel):
+
+    return len(highlevel) + len(lowlevel)
 
 
 if __name__ == "__main__":
@@ -131,15 +166,19 @@ if __name__ == "__main__":
     with open("dataset-1/low.csv", "r") as inputfile:
         print(f"There are {len(inputfile.readlines()) - 1} low-level requirements")
 
-    high_preprocessed, high_index_list = preprocess("dataset-1/high.csv")
-    low_preprocessed, low_index_list = preprocess("dataset-1/low.csv")
-    print(low_index_list)
-
-    vectorRepresentation(low_preprocessed[0], master_vocabulary(high_preprocessed, low_preprocessed), 2,3)
-
     '''
     This is where you should implement the trace level logic as discussed in the 
     assignment on Canvas. Please ensure that you take care to deliver clean,
     modular, and well-commented code.
     '''
+
+    high_preprocessed, high_index_list = preprocess("dataset-1/high.csv")
+    low_preprocessed, low_index_list = preprocess("dataset-1/low.csv")
+
+    master_vocabulary = master_vocabulary(high_preprocessed, low_preprocessed)
+    n = total_requirements(high_preprocessed, low_preprocessed)
+    d_list = create_d_array(high_preprocessed, low_preprocessed, master_vocabulary)
+
+    vector = vectorRepresentation(low_preprocessed[0], master_vocabulary, n, d_list)
+
     write_output_file()
