@@ -202,6 +202,46 @@ def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list):
     return trace_link
 
 
+def evaluate(nr_low, nr_high):
+    trace_iden_and_predicted = 0
+    trace_iden_and_not_predicted = 0
+    trace_not_iden_and_predicted = 0
+    trace_not_iden_and_not_predicted = 0
+    master = {}
+    input = {}
+
+    with open("dataset-1/links.csv", "r") as masterfile:
+        with open("output/links.csv", "r") as inputfile:
+            csv_reader_master = csv.reader(masterfile, delimiter=',')
+            csv_reader_input = csv.reader(inputfile, delimiter=',')
+            for row in csv_reader_master:
+                master[row[0]] = row[1].split(',')
+            for row in csv_reader_input:
+                input[row[0]] = row[1].split(',')
+            for key in master:
+                if input.get(key) is None:
+                    trace_iden_and_not_predicted += len(master[key])
+                else:
+                    for i in range(0, len(master.get(key))):
+                        if master.get(key)[i] in input.get(key):
+                            trace_iden_and_predicted += 1
+                        else:
+                            trace_iden_and_not_predicted += 1
+            for key in input:
+                if master.get(key) is None:
+                    trace_not_iden_and_predicted += len(input[key])
+                else:
+                    for i in range(0, len(input.get(key))):
+                        if input.get(key)[i] not in master.get(key):
+                            print()
+                            trace_not_iden_and_predicted += 1
+
+    trace_not_iden_and_not_predicted = nr_low * nr_high - trace_iden_and_predicted - trace_iden_and_not_predicted - trace_not_iden_and_predicted
+
+    print(trace_iden_and_predicted, trace_iden_and_not_predicted)
+    print(trace_not_iden_and_predicted, trace_not_iden_and_not_predicted)
+    print(trace_iden_and_predicted/(trace_iden_and_predicted + trace_not_iden_and_predicted))
+    print(trace_iden_and_predicted/(trace_iden_and_predicted + 0.5*(trace_iden_and_not_predicted + trace_not_iden_and_predicted)))
 if __name__ == "__main__":
     '''
     Entry point for the script
@@ -233,6 +273,10 @@ if __name__ == "__main__":
     # create similarity matrix
     sim_matrix = similarity_matrix(vectors_high, vectors_low)
     trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
+
+    nr_low = len(vectors_low)
+    write_output_file(trace)
+    evaluate(len(vectors_low), len(vectors_high))
 
     # branch on program input (0, 1, 2 or 3)
     if match_type == 0: 
