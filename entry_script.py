@@ -9,12 +9,12 @@ from numpy.linalg import norm
 
 
 
-def write_output_file():
+def write_output_file(trace_link):
     '''
     Writes a dummy output file using the python csv writer, update this 
     to accept as parameter the found trace links. 
     '''
-    with open('dataset-1/links.csv', 'w') as csvfile:
+    with open('output/links.csv', 'w') as csvfile:
 
         writer = csv.writer(csvfile, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL)
 
@@ -22,9 +22,12 @@ def write_output_file():
         fieldnames = ["id", "links"]
 
         writer.writerow(fieldnames)
-
-        writer.writerow(["UC1", "L1, L34, L5"]) 
-        writer.writerow(["UC2", "L5, L4"])
+        for key in trace_link:
+            str_add = ""
+            highlevel_list = trace_link.get(key)
+            for el in highlevel_list:
+                str_add += el + ","
+            writer.writerow([key, str_add[:-1]])
 
 
 # input: filepath of csv file
@@ -222,7 +225,7 @@ if __name__ == "__main__":
 
     sim_matrix = similarity_matrix(vectors_high, vectors_low)
 
-    print(tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25))
+    trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
 
     # create similarity matrix
     # similarityMatrix(H, L) where H is vector representation of high, L of low
@@ -230,16 +233,14 @@ if __name__ == "__main__":
     # branch on program input (0, 1, 2 or 3)
     if match_type == 0: 
         # Similarity of at least 0
-        print(0)
+        trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.0)
+        write_output_file(trace)
     if match_type == 1:
-        # Similarity of at least .25
-        print(1)    
+        trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
+        write_output_file(trace)
     if match_type == 2:
         # Similarity of at least .67 of the most similar low level requirement.
         print(2)
     if match_type == 3:
         # custom technique
         print(3)
-    
-    # output current links to file (add parameter a list of created links)
-    write_output_file()
