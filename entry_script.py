@@ -27,6 +27,7 @@ def write_output_file(trace_link):
             highlevel_list = trace_link.get(key)
             for el in highlevel_list:
                 str_add += el + ","
+                
             writer.writerow([key, str_add[:-1]])
 
 
@@ -177,13 +178,29 @@ def tracelink_generation(sim_matrix, high_index_list, low_index_list, min_simila
     for i in range(0, len(sim_matrix)):
         for j in range(0, len(sim_matrix[i])):
             if sim_matrix[i][j] > min_similarity:
-                low_id = trace_link.get(low_index_list[j])
+                low_id = trace_link.get(high_index_list[i])
                 if low_id is None:
-                    trace_link[low_index_list[j]] = [high_index_list[i]]
+                    trace_link[high_index_list[i]] = [low_index_list[j]]
                 else:
-                    trace_link[low_index_list[j]].append(high_index_list[i])
+                    trace_link[high_index_list[i]].append(low_index_list[j])
 
     return trace_link
+
+def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list):
+    trace_link = {}
+
+    for i in range(0, len(sim_matrix)):
+        min_similarity = np.max(sim_matrix[i])
+        for j in range(0, len(sim_matrix[i])):
+            if sim_matrix[i][j] >= min_similarity*0.67:
+                low_id = trace_link.get(high_index_list[i])
+                if low_id is None:
+                    trace_link[high_index_list[i]] = [low_index_list[j]]
+                else:
+                    trace_link[high_index_list[i]].append(low_index_list[j])
+
+    return trace_link
+
 
 if __name__ == "__main__":
     '''
@@ -240,7 +257,8 @@ if __name__ == "__main__":
         write_output_file(trace)
     if match_type == 2:
         # Similarity of at least .67 of the most similar low level requirement.
-        print(2)
+        trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list)
+        write_output_file(trace)
     if match_type == 3:
         # custom technique
         print(3)
