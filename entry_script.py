@@ -219,8 +219,8 @@ if __name__ == "__main__":
         exit(1)
 
 
-    high_preprocessed, high_index_list = preprocess("dataset-1/high.csv")
-    low_preprocessed, low_index_list = preprocess("dataset-1/low.csv")
+    high_preprocessed, high_index_list = preprocess("input/high.csv")
+    low_preprocessed, low_index_list = preprocess("input/low.csv")
 
     master_vocabulary = master_vocabulary(high_preprocessed, low_preprocessed)
     n = total_requirements(high_preprocessed, low_preprocessed)
