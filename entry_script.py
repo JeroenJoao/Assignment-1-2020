@@ -167,6 +167,20 @@ def create_d_array(highlevel, lowlevel, master_vocabulary):
 def total_requirements(highlevel, lowlevel):
     return len(highlevel) + len(lowlevel)
 
+# returns tracelink based on minimum similarity score
+def tracelink_generation(sim_matrix, high_index_list, low_index_list, min_similarity):
+    trace_link = {}
+
+    for i in range(0, len(sim_matrix)):
+        for j in range(0, len(sim_matrix[i])):
+            if sim_matrix[i][j] > min_similarity:
+                high_id = trace_link.get(high_index_list[i])
+                if high_id is None:
+                    trace_link[high_index_list[i]] = [low_index_list[j]]
+                else:
+                    trace_link[high_index_list[i]].append(low_index_list[j])
+
+    return trace_link
 
 if __name__ == "__main__":
     '''
@@ -208,7 +222,7 @@ if __name__ == "__main__":
 
     sim_matrix = similarity_matrix(vectors_high, vectors_low)
 
-
+    print(tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25))
 
     # create similarity matrix
     # similarityMatrix(H, L) where H is vector representation of high, L of low
