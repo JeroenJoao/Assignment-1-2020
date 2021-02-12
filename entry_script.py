@@ -27,7 +27,7 @@ def write_output_file(trace_link):
             highlevel_list = trace_link.get(key)
             for el in highlevel_list:
                 str_add += el + ","
-                
+
             writer.writerow([key, str_add[:-1]])
 
 
@@ -216,19 +216,8 @@ if __name__ == "__main__":
         match_type = int(sys.argv[1])
     except ValueError as e:
         print("Match type provided is not a valid number")
-        exit(1)    
+        exit(1)
 
-    print(f"Hello world, running with matchtype {match_type}!")
-
-    # Read input low-level requirements and count them (ignore header line).
-    with open("dataset-1/low.csv", "r") as inputfile:
-        print(f"There are {len(inputfile.readlines()) - 1} low-level requirements")
-
-    '''
-    This is where you should implement the trace level logic as discussed in the 
-    assignment on Canvas. Please ensure that you take care to deliver clean,
-    modular, and well-commented code.
-    '''
 
     high_preprocessed, high_index_list = preprocess("dataset-1/high.csv")
     low_preprocessed, low_index_list = preprocess("dataset-1/low.csv")
