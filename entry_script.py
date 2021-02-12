@@ -174,11 +174,11 @@ def tracelink_generation(sim_matrix, high_index_list, low_index_list, min_simila
     for i in range(0, len(sim_matrix)):
         for j in range(0, len(sim_matrix[i])):
             if sim_matrix[i][j] > min_similarity:
-                high_id = trace_link.get(high_index_list[i])
-                if high_id is None:
-                    trace_link[high_index_list[i]] = [low_index_list[j]]
+                low_id = trace_link.get(low_index_list[j])
+                if low_id is None:
+                    trace_link[low_index_list[j]] = [high_index_list[i]]
                 else:
-                    trace_link[high_index_list[i]].append(low_index_list[j])
+                    trace_link[low_index_list[j]].append(high_index_list[i])
 
     return trace_link
 
