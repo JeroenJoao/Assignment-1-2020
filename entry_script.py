@@ -248,5 +248,5 @@ if __name__ == "__main__":
         trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list)
         write_output_file(trace)
     if match_type == 3:
-        # custom technique
+        # custom technique, try levenstein distance on vectors
         print(3)
