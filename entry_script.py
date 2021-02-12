@@ -3,6 +3,8 @@ import sys
 import math
 from nltk.stem import PorterStemmer
 import numpy as np
+from numpy import dot
+from numpy.linalg import norm
 
 
 
@@ -67,14 +69,24 @@ def preprocess(path):
     return preprocessed[1:], index_list[1:]  # slice the first element which is the type
 
 
-# Input: 2 2D arrays of preprocessed data.
+# Input: 2 2D arrays of vectors.
 # Output: Similarity matrix
-def similarityMatrix(H, L):
-    num = np.dot(H, L.T)
-    p1 = np.sqrt(np.sum(H**2, axis=1))[:, np.newaxis]
-    p2 = np.sqrt(np.sum(L**2, axis=1))[np.newaxis, :]
-    return num/(p1*p2)
+def similarity_matrix(H, L):
+    similarity_matrix_ret = []
 
+    for vector_h in H:
+        row = []
+        for vector_l in L:
+            row.append(cosine_similarity(vector_h, vector_l))
+        similarity_matrix_ret.append(row)
+
+    return similarity_matrix_ret
+
+
+# Input: two vectors of the same size as list
+# Returns: cosine similarity of the two vectors
+def cosine_similarity(a, b):
+    return dot(a, b)/(norm(a)*norm(b))
 
 
 # Input: preprocessed high and lowlevel requirements
@@ -97,7 +109,7 @@ def master_vocabulary(highlevel, lowlevel):
 
 # Input: list of tokens and list master vocabulary, n and d_list
 # output: Vector representation of token list
-def vectorRepresentation(tokenlist, master_vocabulary, n, d_list):
+def vector_representation(tokenlist, master_vocabulary, n, d_list):
     vector = []
 
     for i in range(0, len(master_vocabulary)):
@@ -109,6 +121,13 @@ def vectorRepresentation(tokenlist, master_vocabulary, n, d_list):
             vector.append(tf * idf)
 
     return vector
+
+# returns list of vectors from requirements
+def vector_list(requirements, master_vocabulary, n, d_list):
+    vector_list = []
+    for requirement in requirements:
+        vector_list.append(vector_representation(requirement, master_vocabulary, n, d_list))
+    return vector_list
 
 
 # Input: highlevel and lowlevel requirements list and the master vocabulary(list) with an index
@@ -146,7 +165,6 @@ def create_d_array(highlevel, lowlevel, master_vocabulary):
 # input: highlevel and lowlevel requirements
 # returns the total number of requirements
 def total_requirements(highlevel, lowlevel):
-
     return len(highlevel) + len(lowlevel)
 
 
@@ -185,7 +203,11 @@ if __name__ == "__main__":
     n = total_requirements(high_preprocessed, low_preprocessed)
     d_list = create_d_array(high_preprocessed, low_preprocessed, master_vocabulary)
 
-    vector = vectorRepresentation(low_preprocessed[0], master_vocabulary, n, d_list)
+    vectors_low = vector_list(low_preprocessed, master_vocabulary, n, d_list)
+    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list)
+
+    sim_matrix = similarity_matrix(vectors_high, vectors_low)
+
 
 
     # create similarity matrix
