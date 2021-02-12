@@ -218,23 +218,21 @@ if __name__ == "__main__":
         print("Match type provided is not a valid number")
         exit(1)
 
-
+    # preprocess the input
     high_preprocessed, high_index_list = preprocess("input/high.csv")
     low_preprocessed, low_index_list = preprocess("input/low.csv")
 
+    # get information on input and create the vectors
     master_vocabulary = master_vocabulary(high_preprocessed, low_preprocessed)
     n = total_requirements(high_preprocessed, low_preprocessed)
     d_list = create_d_array(high_preprocessed, low_preprocessed, master_vocabulary)
 
     vectors_low = vector_list(low_preprocessed, master_vocabulary, n, d_list)
-    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list)
-
-    sim_matrix = similarity_matrix(vectors_high, vectors_low)
-
-    trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
+    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list) 
 
     # create similarity matrix
-    # similarityMatrix(H, L) where H is vector representation of high, L of low
+    sim_matrix = similarity_matrix(vectors_high, vectors_low)
+    trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
 
     # branch on program input (0, 1, 2 or 3)
     if match_type == 0: 
@@ -242,6 +240,7 @@ if __name__ == "__main__":
         trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.0)
         write_output_file(trace)
     if match_type == 1:
+         # Similarity of at least 0.25
         trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
         write_output_file(trace)
     if match_type == 2:
