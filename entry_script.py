@@ -70,9 +70,9 @@ def preprocess(path):
 # Input: 2 2D arrays of preprocessed data.
 # Output: Similarity matrix
 def similarityMatrix(H, L):
-    num=np.dot(H,L.T)
-    p1=np.sqrt(np.sum(H**2,axis=1))[:,np.newaxis]
-    p2=np.sqrt(np.sum(L**2,axis=1))[np.newaxis,:]
+    num = np.dot(H, L.T)
+    p1 = np.sqrt(np.sum(H**2, axis=1))[:, np.newaxis]
+    p2 = np.sqrt(np.sum(L**2, axis=1))[np.newaxis, :]
     return num/(p1*p2)
 
 
@@ -121,11 +121,13 @@ def d(highlevel, lowlevel, master_vocabulary, i):
         for word in list:
             if word == word_from_vocabulary:
                 requirements_counter += 1
+                break
 
     for list in lowlevel:
         for word in list:
             if word == word_from_vocabulary:
                 requirements_counter += 1
+                break
 
     return requirements_counter
 
