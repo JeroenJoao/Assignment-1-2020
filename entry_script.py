@@ -190,9 +190,9 @@ def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list):
     trace_link = {}
 
     for i in range(0, len(sim_matrix)):
-        min_similarity = np.max(sim_matrix[i])
+        max_similarity = np.max(sim_matrix[i])
         for j in range(0, len(sim_matrix[i])):
-            if sim_matrix[i][j] >= min_similarity*0.67:
+            if sim_matrix[i][j] >= max_similarity*0.67:
                 low_id = trace_link.get(high_index_list[i])
                 if low_id is None:
                     trace_link[high_index_list[i]] = [low_index_list[j]]
@@ -258,26 +258,25 @@ if __name__ == "__main__":
         print("Match type provided is not a valid number")
         exit(1)
 
-
+    # preprocess the input
     high_preprocessed, high_index_list = preprocess("input/high.csv")
     low_preprocessed, low_index_list = preprocess("input/low.csv")
 
+    # get information on input and create the vectors
     master_vocabulary = master_vocabulary(high_preprocessed, low_preprocessed)
     n = total_requirements(high_preprocessed, low_preprocessed)
     d_list = create_d_array(high_preprocessed, low_preprocessed, master_vocabulary)
 
     vectors_low = vector_list(low_preprocessed, master_vocabulary, n, d_list)
-    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list)
+    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list) 
 
+    # create similarity matrix
     sim_matrix = similarity_matrix(vectors_high, vectors_low)
-
     trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
 
     nr_low = len(vectors_low)
+    write_output_file(trace)
     evaluate(len(vectors_low), len(vectors_high))
-    # create similarity matrix
-    # similarityMatrix(H, L) where H is vector representation of high, L of low
-
 
     # branch on program input (0, 1, 2 or 3)
     if match_type == 0: 
@@ -285,6 +284,7 @@ if __name__ == "__main__":
         trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.0)
         write_output_file(trace)
     if match_type == 1:
+         # Similarity of at least 0.25
         trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
         write_output_file(trace)
     if match_type == 2:
