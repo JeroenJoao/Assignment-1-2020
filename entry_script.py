@@ -14,7 +14,7 @@ def write_output_file(trace_link):
     Writes a dummy output file using the python csv writer, update this 
     to accept as parameter the found trace links. 
     '''
-    with open('output/links.csv', 'w') as csvfile:
+    with open('output/links.csv', 'w', newline='') as csvfile:
 
         writer = csv.writer(csvfile, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL)
 
@@ -113,7 +113,7 @@ def master_vocabulary(highlevel, lowlevel):
 
 # Input: list of tokens and list master vocabulary, n and d_list
 # output: Vector representation of token list
-def vector_representation(tokenlist, master_vocabulary, n, d_list):
+def vector_representation(tokenlist, master_vocabulary, n, d_list, match_type):
     vector = []
 
     for i in range(0, len(master_vocabulary)):
@@ -121,16 +121,25 @@ def vector_representation(tokenlist, master_vocabulary, n, d_list):
             vector.append(0)
         else:
             tf = tokenlist.count(master_vocabulary[i])
-            idf = math.log2(n/d_list[i])
-            vector.append(tf * idf)
-
+            if match_type != 3:
+                idf = math.log2(n/d_list[i])
+                vector.append(tf * idf)
+            else:
+                # to try: 
+                # Count vectorizer: only return tf
+                # vector.append(tf)
+                # Use normal tf-idf:
+                idf = math.log2(n/d_list[i])
+                vector.append(tf * idf)
+                # word2vec from gensim library: neural net
+                
     return vector
 
 # returns list of vectors from requirements
-def vector_list(requirements, master_vocabulary, n, d_list):
+def vector_list(requirements, master_vocabulary, n, d_list, match_type):
     vector_list = []
     for requirement in requirements:
-        vector_list.append(vector_representation(requirement, master_vocabulary, n, d_list))
+        vector_list.append(vector_representation(requirement, master_vocabulary, n, d_list, match_type))
     return vector_list
 
 
@@ -238,10 +247,17 @@ def evaluate(nr_low, nr_high):
 
     trace_not_iden_and_not_predicted = nr_low * nr_high - trace_iden_and_predicted - trace_iden_and_not_predicted - trace_not_iden_and_predicted
 
-    print(trace_iden_and_predicted, trace_iden_and_not_predicted)
-    print(trace_not_iden_and_predicted, trace_not_iden_and_not_predicted)
-    print(trace_iden_and_predicted/(trace_iden_and_predicted + trace_not_iden_and_predicted))
-    print(trace_iden_and_predicted/(trace_iden_and_predicted + 0.5*(trace_iden_and_not_predicted + trace_not_iden_and_predicted)))
+    precision = trace_iden_and_predicted/(trace_iden_and_predicted + trace_not_iden_and_predicted)
+    recall = trace_iden_and_predicted/(trace_iden_and_predicted + trace_iden_and_not_predicted)
+    print("Confusion matrix:")
+    print(trace_iden_and_predicted, "|", trace_iden_and_not_predicted)
+    print("---------")
+    print(trace_not_iden_and_predicted,"|", trace_not_iden_and_not_predicted)
+    print()
+    print("Precision:", precision)
+    print("Recall:", recall)
+    print("F-measure:", 2*(precision * recall)/(precision + recall))
+
 if __name__ == "__main__":
     '''
     Entry point for the script
@@ -267,8 +283,8 @@ if __name__ == "__main__":
     n = total_requirements(high_preprocessed, low_preprocessed)
     d_list = create_d_array(high_preprocessed, low_preprocessed, master_vocabulary)
 
-    vectors_low = vector_list(low_preprocessed, master_vocabulary, n, d_list)
-    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list) 
+    vectors_low = vector_list(low_preprocessed, master_vocabulary, n, d_list, match_type)
+    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list, match_type) 
 
     # create similarity matrix
     sim_matrix = similarity_matrix(vectors_high, vectors_low)
@@ -293,4 +309,5 @@ if __name__ == "__main__":
         write_output_file(trace)
     if match_type == 3:
         # custom technique, try levenstein distance on vectors
-        print(3)
+        trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list)
+        write_output_file(trace)
