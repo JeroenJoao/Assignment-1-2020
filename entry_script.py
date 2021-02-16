@@ -195,13 +195,13 @@ def tracelink_generation(sim_matrix, high_index_list, low_index_list, min_simila
 
     return trace_link
 
-def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list):
+def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, similarity):
     trace_link = {}
 
     for i in range(0, len(sim_matrix)):
         max_similarity = np.max(sim_matrix[i])
         for j in range(0, len(sim_matrix[i])):
-            if sim_matrix[i][j] >= max_similarity*0.67:
+            if sim_matrix[i][j] >= max_similarity*similarity:
                 low_id = trace_link.get(high_index_list[i])
                 if low_id is None:
                     trace_link[high_index_list[i]] = [low_index_list[j]]
@@ -209,6 +209,40 @@ def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list):
                     trace_link[high_index_list[i]].append(low_index_list[j])
 
     return trace_link
+
+
+def custom_tracelink(sim_matrix, high_index_list, low_index_list):
+    new_tracelink = {}
+    tracelink1 = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.3)
+    tracelink2 = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, 0.96)
+    for key in tracelink1:
+        if key in tracelink2:
+            final_list = list(set(tracelink1[key]) | set(tracelink2[key]))
+            new_tracelink[key] = final_list
+        else:
+            new_tracelink[key] = tracelink1[key]
+    for key in tracelink2:
+        if key not in tracelink1:
+            new_tracelink[key] = tracelink2[key]
+    return new_tracelink
+
+
+def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
+    highestScore = 0
+    bestnr1 = 0
+    bestnr2 = 0
+    for i in range(0, 100):
+        print(i, highestScore)
+        print("hello")
+        for j in range(0, 100):
+            trace_new = custom_tracelink(sim_matrix, high_index_list, low_index_list, i/100, j/100)
+            write_output_file(trace_new)
+            score = evaluate(len1, len2)
+            if score > highestScore:
+                highestScore = score
+                bestnr1 = i
+                bestnr2 = j
+    return bestnr1, bestnr2
 
 
 def evaluate(nr_low, nr_high):
@@ -257,6 +291,7 @@ def evaluate(nr_low, nr_high):
     print("Precision:", precision)
     print("Recall:", recall)
     print("F-measure:", 2*(precision * recall)/(precision + recall))
+    return 2*(precision * recall)/(precision + recall)
 
 if __name__ == "__main__":
     '''
@@ -290,9 +325,7 @@ if __name__ == "__main__":
     sim_matrix = similarity_matrix(vectors_high, vectors_low)
     trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
 
-    nr_low = len(vectors_low)
-    write_output_file(trace)
-    evaluate(len(vectors_low), len(vectors_high))
+
 
     # branch on program input (0, 1, 2 or 3)
     if match_type == 0: 
@@ -300,14 +333,16 @@ if __name__ == "__main__":
         trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.0)
         write_output_file(trace)
     if match_type == 1:
-         # Similarity of at least 0.25
-        trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
+        # Similarity of at least 0.25
+        trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.2)
         write_output_file(trace)
     if match_type == 2:
         # Similarity of at least .67 of the most similar low level requirement.
-        trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list)
+        trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, 0.8)
         write_output_file(trace)
     if match_type == 3:
         # custom technique, try levenstein distance on vectors
-        trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list)
+        trace = custom_tracelink(sim_matrix, high_index_list, low_index_list)
         write_output_file(trace)
+
+    evaluate(len(vectors_low), len(vectors_high))
