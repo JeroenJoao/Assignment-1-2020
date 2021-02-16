@@ -211,7 +211,7 @@ def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, si
     return trace_link
 
 
-def custom_tracelink(sim_matrix, high_index_list, low_index_list):
+def custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2):
     new_tracelink = {}
     tracelink1 = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.3)
     tracelink2 = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, 0.96)
@@ -232,8 +232,6 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
     bestnr1 = 0
     bestnr2 = 0
     for i in range(0, 100):
-        print(i, highestScore)
-        print("hello")
         for j in range(0, 100):
             trace_new = custom_tracelink(sim_matrix, high_index_list, low_index_list, i/100, j/100)
             write_output_file(trace_new)
@@ -245,7 +243,7 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
     return bestnr1, bestnr2
 
 
-def evaluate(nr_low, nr_high):
+def evaluate(nr_low, nr_high, verbose = False):
     trace_iden_and_predicted = 0
     trace_iden_and_not_predicted = 0
     trace_not_iden_and_predicted = 0
@@ -276,21 +274,22 @@ def evaluate(nr_low, nr_high):
                 else:
                     for i in range(0, len(input.get(key))):
                         if input.get(key)[i] not in master.get(key):
-                            print()
                             trace_not_iden_and_predicted += 1
 
     trace_not_iden_and_not_predicted = nr_low * nr_high - trace_iden_and_predicted - trace_iden_and_not_predicted - trace_not_iden_and_predicted
+    precision = trace_iden_and_predicted / (trace_iden_and_predicted + trace_not_iden_and_predicted)
+    recall = trace_iden_and_predicted / (trace_iden_and_predicted + trace_iden_and_not_predicted)
 
-    precision = trace_iden_and_predicted/(trace_iden_and_predicted + trace_not_iden_and_predicted)
-    recall = trace_iden_and_predicted/(trace_iden_and_predicted + trace_iden_and_not_predicted)
-    print("Confusion matrix:")
-    print(trace_iden_and_predicted, "|", trace_iden_and_not_predicted)
-    print("---------")
-    print(trace_not_iden_and_predicted,"|", trace_not_iden_and_not_predicted)
-    print()
-    print("Precision:", precision)
-    print("Recall:", recall)
-    print("F-measure:", 2*(precision * recall)/(precision + recall))
+    if verbose:
+        print("Confusion matrix:")
+        print(trace_iden_and_predicted, "|", trace_iden_and_not_predicted)
+        print("---------")
+        print(trace_not_iden_and_predicted,"|", trace_not_iden_and_not_predicted)
+        print()
+        print("Precision:", precision)
+        print("Recall:", recall)
+        print("F-measure:", 2*(precision * recall)/(precision + recall))
+
     return 2*(precision * recall)/(precision + recall)
 
 if __name__ == "__main__":
@@ -342,7 +341,8 @@ if __name__ == "__main__":
         write_output_file(trace)
     if match_type == 3:
         # custom technique, try levenstein distance on vectors
-        trace = custom_tracelink(sim_matrix, high_index_list, low_index_list)
+        param1, param2 = findbest(sim_matrix, high_index_list, low_index_list, len(vectors_low), len(vectors_high))
+        trace = custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param1)
         write_output_file(trace)
 
-    evaluate(len(vectors_low), len(vectors_high))
+    evaluate(len(vectors_low), len(vectors_high), verbose=True)
