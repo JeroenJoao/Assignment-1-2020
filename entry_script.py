@@ -36,7 +36,7 @@ def write_output_file(trace_link):
 def tokenize(filepath):
     tokens = []
     tokenIndexes = []
-    with open(filepath, "r") as inputfile:
+    with open(filepath, "r", encoding='utf8') as inputfile:
         csv_reader = csv.reader(inputfile, delimiter=',')
         for row in csv_reader:
             tokenIndexes.append(row[0])
@@ -276,7 +276,6 @@ def evaluate(nr_low, nr_high):
                 else:
                     for i in range(0, len(input.get(key))):
                         if input.get(key)[i] not in master.get(key):
-                            print()
                             trace_not_iden_and_predicted += 1
 
     trace_not_iden_and_not_predicted = nr_low * nr_high - trace_iden_and_predicted - trace_iden_and_not_predicted - trace_not_iden_and_predicted
