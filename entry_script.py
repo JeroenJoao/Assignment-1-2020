@@ -74,7 +74,6 @@ def preprocess(path):
             temp.append(ps.stem(word))
         preprocessed.append(temp)
 
-    print(preprocessed[1:])
     return preprocessed[1:], index_list[1:]  # slice the first element which is the type
 
 
@@ -206,7 +205,7 @@ def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, si
     for i in range(0, len(sim_matrix)):
         max_similarity = np.max(sim_matrix[i])
         for j in range(0, len(sim_matrix[i])):
-            if sim_matrix[i][j] >= max_similarity*similarity:
+            if sim_matrix[i][j] >= max_similarity*similarity and max_similarity > 0:
                 low_id = trace_link.get(high_index_list[i])
                 if low_id is None:
                     trace_link[high_index_list[i]] = [low_index_list[j]]
@@ -222,8 +221,7 @@ def custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2
     tracelink2 = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, param2)
     for key in tracelink1:
         if key in tracelink2:
-            final_list = list(set(tracelink1[key]) | set(tracelink2[key]))
-            new_tracelink[key] = final_list
+            new_tracelink[key] = list(set(tracelink1[key] + tracelink2[key]))
         else:
             new_tracelink[key] = tracelink1[key]
     for key in tracelink2:
@@ -245,7 +243,7 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
                 highestScore = score
                 bestnr1 = i
                 bestnr2 = j
-    return bestnr1, bestnr2
+    return bestnr1/100, bestnr2/100
 
 
 def evaluate(nr_low, nr_high, verbose = False):
@@ -261,9 +259,12 @@ def evaluate(nr_low, nr_high, verbose = False):
             csv_reader_master = csv.reader(masterfile, delimiter=',')
             csv_reader_input = csv.reader(inputfile, delimiter=',')
             for row in csv_reader_master:
-                master[row[0]] = row[1].split(',')
+                if row[0] != "id":
+                    master[row[0]] = row[1].split(',')
+
             for row in csv_reader_input:
-                input[row[0]] = row[1].split(',')
+                if row[0] != "id":
+                    input[row[0]] = row[1].split(',')
             for key in master:
                 if input.get(key) is None:
                     trace_iden_and_not_predicted += len(master[key])
@@ -282,8 +283,17 @@ def evaluate(nr_low, nr_high, verbose = False):
                             trace_not_iden_and_predicted += 1
 
     trace_not_iden_and_not_predicted = nr_low * nr_high - trace_iden_and_predicted - trace_iden_and_not_predicted - trace_not_iden_and_predicted
-    precision = trace_iden_and_predicted / (trace_iden_and_predicted + trace_not_iden_and_predicted)
+    try:
+        precision = trace_iden_and_predicted / (trace_iden_and_predicted + trace_not_iden_and_predicted)
+    except ZeroDivisionError as e:
+        precision = 0
+
     recall = trace_iden_and_predicted / (trace_iden_and_predicted + trace_iden_and_not_predicted)
+    try:
+        fmeasure = 2*(precision * recall)/(precision + recall)
+
+    except ZeroDivisionError as e:
+        fmeasure = 0
 
     if verbose:
         print("Confusion matrix:")
@@ -293,9 +303,12 @@ def evaluate(nr_low, nr_high, verbose = False):
         print()
         print("Precision:", precision)
         print("Recall:", recall)
-        print("F-measure:", 2*(precision * recall)/(precision + recall))
+        print("F-measure:", fmeasure)
 
-    return 2*(precision * recall)/(precision + recall)
+    try:
+        return 2*(precision * recall)/(precision + recall)
+    except ZeroDivisionError:
+        return 0
 
 if __name__ == "__main__":
     '''
@@ -347,7 +360,7 @@ if __name__ == "__main__":
     if match_type == 3:
         # custom technique, try levenstein distance on vectors
         param1, param2 = findbest(sim_matrix, high_index_list, low_index_list, len(vectors_low), len(vectors_high))
-        trace = custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param1)
+        trace = custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2)
         write_output_file(trace)
 
     evaluate(len(vectors_low), len(vectors_high), verbose=True)
