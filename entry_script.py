@@ -231,8 +231,8 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
     highestScore = 0
     bestnr1 = 0
     bestnr2 = 0
-    for i in range(0, 100):
-        for j in range(0, 100):
+    for i in range(0, 101):
+        for j in range(0, 101):
             trace_new = custom_tracelink(sim_matrix, high_index_list, low_index_list, i/100, j/100)
             write_output_file(trace_new)
             score = evaluate(len1, len2)
