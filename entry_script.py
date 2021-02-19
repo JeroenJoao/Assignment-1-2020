@@ -36,7 +36,7 @@ def write_output_file(trace_link):
 def tokenize(filepath):
     tokens = []
     tokenIndexes = []
-    with open(filepath, "r") as inputfile:
+    with open(filepath, "r", encoding='utf8') as inputfile:
         csv_reader = csv.reader(inputfile, delimiter=',')
         for row in csv_reader:
             tokenIndexes.append(row[0])
@@ -333,11 +333,11 @@ if __name__ == "__main__":
         write_output_file(trace)
     if match_type == 1:
         # Similarity of at least 0.25
-        trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.2)
+        trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.25)
         write_output_file(trace)
     if match_type == 2:
         # Similarity of at least .67 of the most similar low level requirement.
-        trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, 0.8)
+        trace = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, 0.67)
         write_output_file(trace)
     if match_type == 3:
         # custom technique, try levenstein distance on vectors
