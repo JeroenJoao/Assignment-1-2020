@@ -5,8 +5,7 @@ from nltk.stem import PorterStemmer
 import numpy as np
 from numpy import dot
 from numpy.linalg import norm
-
-
+import string
 
 
 def write_output_file(trace_link):
@@ -34,6 +33,7 @@ def write_output_file(trace_link):
 # input: filepath of csv file
 # returns 2D array containing an array of lists of tokenized words
 def tokenize(filepath):
+    table = str.maketrans(dict.fromkeys(string.punctuation))
     tokens = []
     tokenIndexes = []
     with open(filepath, "r", encoding='utf8') as inputfile:
@@ -41,7 +41,11 @@ def tokenize(filepath):
         for row in csv_reader:
             tokenIndexes.append(row[0])
             tokenized_row = row[1].split()
-            tokens.append(tokenized_row)
+            tokens_no_punct = []
+            for token in tokenized_row:
+                no_punctuation_token = str.lower(token).translate(table)
+                tokens_no_punct.append(no_punctuation_token)
+            tokens.append(tokens_no_punct)
     return tokens, tokenIndexes
 
 
@@ -70,6 +74,7 @@ def preprocess(path):
             temp.append(ps.stem(word))
         preprocessed.append(temp)
 
+    print(preprocessed[1:])
     return preprocessed[1:], index_list[1:]  # slice the first element which is the type
 
 
