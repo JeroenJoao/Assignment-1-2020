@@ -256,7 +256,7 @@ def evaluate(nr_low, nr_high, verbose = False):
     master = {}
     input = {}
 
-    with open("dataset-1/links.csv", "r") as masterfile:
+    with open("input/links.csv", "r") as masterfile:
         with open("output/links.csv", "r") as inputfile:
             csv_reader_master = csv.reader(masterfile, delimiter=',')
             csv_reader_input = csv.reader(inputfile, delimiter=',')
