@@ -218,8 +218,8 @@ def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, si
 
 def custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2):
     new_tracelink = {}
-    tracelink1 = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.3)
-    tracelink2 = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, 0.96)
+    tracelink1 = tracelink_generation(sim_matrix, high_index_list, low_index_list, param1)
+    tracelink2 = highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, param2)
     for key in tracelink1:
         if key in tracelink2:
             final_list = list(set(tracelink1[key]) | set(tracelink2[key]))
