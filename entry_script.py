@@ -234,8 +234,8 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
     highestScore = 0
     bestnr1 = 0
     bestnr2 = 0
-    for i in range(0, 101):
-        for j in range(0, 101):
+    for i in range(0, 102):
+        for j in range(0, 102):
             trace_new = custom_tracelink(sim_matrix, high_index_list, low_index_list, i/100, j/100)
             write_output_file(trace_new)
             score = evaluate(len1, len2)
@@ -319,12 +319,20 @@ if __name__ == "__main__":
         exit(1)
 
     match_type = 0
+    eval = False
 
     try:
         match_type = int(sys.argv[1])
     except ValueError as e:
         print("Match type provided is not a valid number")
         exit(1)
+
+    try:
+        if "--eval" in sys.argv:
+            eval = True
+        print("Running with evaluation\n")
+    except Exception as e:
+        print("Running without evaluation\n")
 
     # preprocess the input
     high_preprocessed, high_index_list = preprocess("input/high.csv")
@@ -360,7 +368,9 @@ if __name__ == "__main__":
     if match_type == 3:
         # custom technique, try levenstein distance on vectors
         param1, param2 = findbest(sim_matrix, high_index_list, low_index_list, len(vectors_low), len(vectors_high))
+        print(param1, param2)
         trace = custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2)
         write_output_file(trace)
 
-    evaluate(len(vectors_low), len(vectors_high), verbose=True)
+    if eval:
+        evaluate(len(vectors_low), len(vectors_high), verbose=True)
