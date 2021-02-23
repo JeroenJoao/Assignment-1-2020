@@ -10,8 +10,8 @@ import string
 
 def write_output_file(trace_link):
     '''
-    Writes a dummy output file using the python csv writer, update this 
-    to accept as parameter the found trace links. 
+    Writes a dummy output file using the python csv writer, update this
+    to accept as parameter the found trace links.
     '''
     with open('output/links.csv', 'w', newline='') as csvfile:
 
@@ -129,14 +129,14 @@ def vector_representation(tokenlist, master_vocabulary, n, d_list, match_type):
                 idf = math.log2(n/d_list[i])
                 vector.append(tf * idf)
             else:
-                # to try: 
+                # to try:
                 # Count vectorizer: only return tf
                 # vector.append(tf)
                 # Use normal tf-idf:
                 idf = math.log2(n/d_list[i])
                 vector.append(tf * idf)
                 # word2vec from gensim library: neural net
-                
+
     return vector
 
 # returns list of vectors from requirements
@@ -245,8 +245,17 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
                 bestnr2 = j
     return bestnr1/100, bestnr2/100
 
+def find_csv_links_for_requirement(file, value):
+    file.seek(0)
+    reader = csv.reader(file, delimiter=',')
 
-def evaluate(nr_low, nr_high, verbose = False):
+    for row in reader:
+        if value == row[0]:
+             return row[1].split(",")
+
+    return []
+
+def evaluate(high, low, verbose = False):
     trace_iden_and_predicted = 0
     trace_iden_and_not_predicted = 0
     trace_not_iden_and_predicted = 0
@@ -256,33 +265,20 @@ def evaluate(nr_low, nr_high, verbose = False):
 
     with open("input/links.csv", "r") as masterfile:
         with open("output/links.csv", "r") as inputfile:
-            csv_reader_master = csv.reader(masterfile, delimiter=',')
-            csv_reader_input = csv.reader(inputfile, delimiter=',')
-            for row in csv_reader_master:
-                if row[0] != "id":
-                    master[row[0]] = row[1].split(',')
+            for h in high:
+                manually_constructed_links = find_csv_links_for_requirement(masterfile, h)
+                program_constructed_links = find_csv_links_for_requirement(inputfile, h)
 
-            for row in csv_reader_input:
-                if row[0] != "id":
-                    input[row[0]] = row[1].split(',')
-            for key in master:
-                if input.get(key) is None:
-                    trace_iden_and_not_predicted += len(master[key])
-                else:
-                    for i in range(0, len(master.get(key))):
-                        if master.get(key)[i] in input.get(key):
-                            trace_iden_and_predicted += 1
-                        else:
-                            trace_iden_and_not_predicted += 1
-            for key in input:
-                if master.get(key) is None:
-                    trace_not_iden_and_predicted += len(input[key])
-                else:
-                    for i in range(0, len(input.get(key))):
-                        if input.get(key)[i] not in master.get(key):
-                            trace_not_iden_and_predicted += 1
+                for l in low:
+                    if l in manually_constructed_links and l in program_constructed_links:
+                        trace_iden_and_predicted += 1
+                    elif l in manually_constructed_links and not l in program_constructed_links:
+                        trace_iden_and_not_predicted += 1
+                    elif not l in manually_constructed_links and l in program_constructed_links:
+                        trace_not_iden_and_predicted += 1
+                    elif not l in manually_constructed_links and not l in program_constructed_links:
+                        trace_not_iden_and_not_predicted += 1
 
-    trace_not_iden_and_not_predicted = nr_low * nr_high - trace_iden_and_predicted - trace_iden_and_not_predicted - trace_not_iden_and_predicted
     try:
         precision = trace_iden_and_predicted / (trace_iden_and_predicted + trace_not_iden_and_predicted)
     except ZeroDivisionError as e:
@@ -344,7 +340,7 @@ if __name__ == "__main__":
     d_list = create_d_array(high_preprocessed, low_preprocessed, master_vocabulary)
 
     vectors_low = vector_list(low_preprocessed, master_vocabulary, n, d_list, match_type)
-    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list, match_type) 
+    vectors_high = vector_list(high_preprocessed, master_vocabulary, n, d_list, match_type)
 
     # create similarity matrix
     sim_matrix = similarity_matrix(vectors_high, vectors_low)
@@ -353,7 +349,7 @@ if __name__ == "__main__":
 
 
     # branch on program input (0, 1, 2 or 3)
-    if match_type == 0: 
+    if match_type == 0:
         # Similarity of at least 0
         trace = tracelink_generation(sim_matrix, high_index_list, low_index_list, 0.0)
         write_output_file(trace)
@@ -373,4 +369,4 @@ if __name__ == "__main__":
         write_output_file(trace)
 
     if eval:
-        evaluate(len(vectors_low), len(vectors_high), verbose=True)
+        evaluate(high_index_list, low_index_list, verbose=True)
