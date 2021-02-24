@@ -184,6 +184,7 @@ def create_d_array(highlevel, lowlevel, master_vocabulary):
 def total_requirements(highlevel, lowlevel):
     return len(highlevel) + len(lowlevel)
 
+
 # returns tracelink based on minimum similarity score
 def tracelink_generation(sim_matrix, high_index_list, low_index_list, min_similarity):
     trace_link = {}
@@ -238,7 +239,7 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
         for j in range(0, 102):
             trace_new = custom_tracelink(sim_matrix, high_index_list, low_index_list, i/100, j/100)
             write_output_file(trace_new)
-            score = evaluate(len1, len2)
+            score = evaluate(high_index_list, low_index_list)
             if score > highestScore:
                 highestScore = score
                 bestnr1 = i
@@ -280,14 +281,17 @@ def evaluate(high, low, verbose = False):
                         trace_not_iden_and_not_predicted += 1
 
     try:
-        precision = trace_iden_and_predicted / (trace_iden_and_predicted + trace_not_iden_and_predicted)
+        recall = trace_iden_and_predicted / (trace_iden_and_predicted + trace_not_iden_and_predicted)
+    except ZeroDivisionError as e:
+        recall = 0
+
+    try:
+        precision = trace_iden_and_predicted / (trace_iden_and_predicted + trace_iden_and_not_predicted)
     except ZeroDivisionError as e:
         precision = 0
 
-    recall = trace_iden_and_predicted / (trace_iden_and_predicted + trace_iden_and_not_predicted)
     try:
         fmeasure = 2*(precision * recall)/(precision + recall)
-
     except ZeroDivisionError as e:
         fmeasure = 0
 
@@ -297,8 +301,8 @@ def evaluate(high, low, verbose = False):
         print("---------")
         print(trace_not_iden_and_predicted,"|", trace_not_iden_and_not_predicted)
         print()
-        print("Precision:", precision)
         print("Recall:", recall)
+        print("Precision:", precision)
         print("F-measure:", fmeasure)
 
     try:
@@ -364,7 +368,6 @@ if __name__ == "__main__":
     if match_type == 3:
         # custom technique, try levenstein distance on vectors
         param1, param2 = findbest(sim_matrix, high_index_list, low_index_list, len(vectors_low), len(vectors_high))
-        print(param1, param2)
         trace = custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2)
         write_output_file(trace)
 
