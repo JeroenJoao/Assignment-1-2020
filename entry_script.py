@@ -139,6 +139,7 @@ def vector_representation(tokenlist, master_vocabulary, n, d_list, match_type):
 
     return vector
 
+
 # returns list of vectors from requirements
 def vector_list(requirements, master_vocabulary, n, d_list, match_type):
     vector_list = []
@@ -185,7 +186,7 @@ def total_requirements(highlevel, lowlevel):
     return len(highlevel) + len(lowlevel)
 
 
-# returns tracelink based on minimum similarity score
+# returns tracelink based on minimum similarity score(method 0 and 1)
 def tracelink_generation(sim_matrix, high_index_list, low_index_list, min_similarity):
     trace_link = {}
 
@@ -200,6 +201,8 @@ def tracelink_generation(sim_matrix, high_index_list, low_index_list, min_simila
 
     return trace_link
 
+
+# Computes and outputs the trace link based on method 2
 def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, similarity):
     trace_link = {}
 
@@ -216,6 +219,7 @@ def highest_similarity_tracelink(sim_matrix, high_index_list, low_index_list, si
     return trace_link
 
 
+# Computes and outputs the trace link based on the custom method
 def custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2):
     new_tracelink = {}
     tracelink1 = tracelink_generation(sim_matrix, high_index_list, low_index_list, param1)
@@ -231,10 +235,12 @@ def custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2
     return new_tracelink
 
 
+# implements the grid search and returns the best variables
 def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
     highestScore = 0
     bestnr1 = 0
     bestnr2 = 0
+
     for i in range(0, 102):
         for j in range(0, 102):
             trace_new = custom_tracelink(sim_matrix, high_index_list, low_index_list, i/100, j/100)
@@ -244,7 +250,9 @@ def findbest(sim_matrix, high_index_list, low_index_list, len1, len2):
                 highestScore = score
                 bestnr1 = i
                 bestnr2 = j
+
     return bestnr1/100, bestnr2/100
+
 
 def find_csv_links_for_requirement(file, value):
     file.seek(0)
@@ -256,7 +264,9 @@ def find_csv_links_for_requirement(file, value):
 
     return []
 
-def evaluate(high, low, verbose = False):
+
+# calculates and prints the evaluation based on the input links file and output links file
+def evaluate(high, low, verbose=False):
     trace_iden_and_predicted = 0
     trace_iden_and_not_predicted = 0
     trace_not_iden_and_predicted = 0
@@ -310,6 +320,7 @@ def evaluate(high, low, verbose = False):
     except ZeroDivisionError:
         return 0
 
+
 if __name__ == "__main__":
     '''
     Entry point for the script
@@ -327,11 +338,10 @@ if __name__ == "__main__":
         print("Match type provided is not a valid number")
         exit(1)
 
-    try:
-        if "--eval" in sys.argv:
-            eval = True
+    if "--eval" in sys.argv:
+        eval = True
         print("Running with evaluation\n")
-    except Exception as e:
+    else:
         print("Running without evaluation\n")
 
     # preprocess the input
@@ -371,5 +381,6 @@ if __name__ == "__main__":
         trace = custom_tracelink(sim_matrix, high_index_list, low_index_list, param1, param2)
         write_output_file(trace)
 
-    if eval:
+    # prints the evaluation if the --eval tag was included
+    if eval:    
         evaluate(high_index_list, low_index_list, verbose=True)
